@@ -5,6 +5,7 @@ const port = process.env.PORT;
 const jwt = require("jsonwebtoken");
 const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const db = require("./db");
 
 app.use(cors());
 app.use(express.json());
@@ -46,6 +47,7 @@ async function run() {
     await client.connect();
     const webinaryDB = client.db("webinary");
     const eventCollection = webinaryDB.collection("eventCollection");
+    const bookingCollection = webinaryDB.collection("bookingCollection");
 
     const userCollection = webinaryDB.collection("userCollection");
 
@@ -64,6 +66,33 @@ async function run() {
     });
 
     app.get("/events/:id", async (req, res) => {
+      const id = req.params.id;
+      const eventsData = await eventCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      res.send(eventsData);
+    });
+
+    app.post("/bookings", verifyToken, async (req, res) => {
+      const bookingsData = req.body;
+      const result = await bookingCollection.insertOne(bookingsData);
+      res.send(result);
+    });
+    app.get("/bookings/:id", async (req, res) => {
+      const id = req.params.id;
+      const bookingsData = await bookingCollection.findOne({
+        _id: new ObjectId(id),
+      });
+      res.send(bookingsData);
+    });
+    app.get("/booking", async (req, res) => {
+      const eventsData = eventCollection.find();
+      const result = await eventsData.toArray();
+
+      res.send(result);
+    });
+
+    app.get("/booking/:id", async (req, res) => {
       const id = req.params.id;
       const eventsData = await eventCollection.findOne({
         _id: new ObjectId(id),
@@ -139,7 +168,7 @@ async function run() {
 run().catch(console.dir);
 
 app.get("/", (req, res) => {
-  res.send("Hello");
+  res.send("Webinary is live");
 });
 
 app.listen(port, (req, res) => {
