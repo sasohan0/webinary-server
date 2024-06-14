@@ -80,7 +80,7 @@ async function run() {
       const result = await bookingCollection.insertOne(bookingsData);
       res.send(result);
     });
-    app.get("/bookings/:id", async (req, res) => {
+    app.get("/bookings/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const bookingsData = await bookingCollection.findOne({
         _id: new ObjectId(id),
@@ -93,7 +93,7 @@ async function run() {
 
       res.send(result);
     });
-    app.get("/bookings", async (req, res) => {
+    app.get("/bookings", verifyToken, async (req, res) => {
       const bookingsData = bookingCollection.find();
       const result = await bookingsData.toArray();
 
@@ -119,7 +119,7 @@ async function run() {
       });
       res.send(eventsData);
     });
-    app.get("/booking/payment/:id", async (req, res) => {
+    app.get("/booking/payment/:id", verifyToken, async (req, res) => {
       const id = req.params.id;
       const bookingData = await bookingCollection.findOne({
         _id: new ObjectId(id),
